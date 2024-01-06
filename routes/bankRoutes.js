@@ -1,6 +1,5 @@
 import express from "express";
-import { createUser, deleteUser, filteredUsers, getAllUsers, getUserById } from "../controllers/bankController.js";
-// import {creatUser, deleteUser, depositCash, filteredUsers, getAllUsers, getUserById, transferMoney, updateUserCredit, withdrawMoney } from "../controllers/bankController.js";
+import { createUser, deleteUser, depositCash, filteredUsers, getAllUsers, getUserById, transferMoney, updateUserCredit, withdrawMoney } from "../controllers/bankController.js";
 
 const router = express.Router();
 
@@ -17,16 +16,16 @@ router.get('/filter/moreThan', filteredUsers)
 router.post("/", createUser);
 
 //Route deposit cash to a user. (by the user's ID and amount of cash)
-// router.put('/depositCash', depositCash)
+router.put('/depositCash', depositCash)
 
 //Route withdraw money from a user. (by the user's ID and amount of money)
-//router.put('/withdrawMoney', withdrawMoney)
+router.put('/withdrawMoney', withdrawMoney)
 
 //Route to update an existing user's credit
-//router.put('/updateCredit', updateUserCredit)
+router.put('/updateCredit', updateUserCredit)
 
 //Route transfer money from one user to another with credit
-//router.put('/transferMoney', transferMoney)
+router.put('/transferMoney', transferMoney)
 
 //Route to delete a user
 router.delete('/:id', deleteUser)

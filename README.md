@@ -1,4 +1,4 @@
-# bankAPI
+# bankBackend
 We are going to build a bank API.
 You are a manager of a big bank.
 The manager has access to the users of the bank and 
@@ -19,4 +19,4 @@ the user (can withdraw money until the cash and credit run out) use:
 
 
 
-# bankBackend
+

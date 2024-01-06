@@ -15,7 +15,7 @@ export const getAllUsers = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
   try {
     // const user = await User.findById(req.params.id);
-    const user = await User.find({ ID: req.params.id });
+    const user = await User.findOne({ ID: req.params.id });
     if (!user) {
       res.status(STATUS_CODE.NOT_FOUND);
       throw new Error("No such user in the database");
@@ -40,10 +40,14 @@ export const createUser = async (req, res, next) => {
 // Controller to delete a user by id
 export const deleteUser = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.id;
+    if (userId === undefined) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("add id as a parameter");
+    }
     // Find the user
     // const user = await User.findById(userId);
-    const user = await User.find({ ID: userId });
+    const user = await User.findOne({ ID: userId });
     if (!user) {
       res.status(STATUS_CODE.NOT_FOUND);
       throw new Error("No such user in the db");
@@ -76,144 +80,181 @@ export const filteredUsers = async (req, res, next) => {
   }
 };
 
-// //@des    deposit cash to a user. (by the user's ID and amount of cash)
-// //@route  Put /api/v1/bank/depositCash/?id=&amount=  query parameters(id & amount)
-// export const depositCash = async (req, res, next) => {
-//   try {
-//     if (req.query.amount === undefined || req.query.id === undefined) {
-//       res.status(STATUS_CODE.BAD_REQUEST);
-//       throw new Error("add (id ,amount)  as a query parameters");
-//     }
-//     const amount = Number(req.query.amount);
-//     const userId = req.query.id;
-//     const user = await User.findById(userId);
-//     // const user = await User.find({ ID: userId });
-//     if (!user) {
-//       res.status(STATUS_CODE.NOT_FOUND);
-//       throw new Error("No such user in the db");
-//     }
-//     let newCach = user.cash + amount;
-//     await User.updateOne(
-//       { _id: user._id },
-//       {
-//         $set: { cash: newCach },
-//       }
-//     );
-//     res.send("deposit cash to a user done! ");
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+//@des    deposit cash to a user. (by the user's ID and amount of cash)
+//@route  Put /api/v1/bank/depositCash/?id=&amount=  query parameters(id & amount)
+export const depositCash = async (req, res, next) => {
+  try {
+    if (req.query.amount === undefined || req.query.id === undefined) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("add (id ,amount)  as a query parameters");
+    }
+    const amount = Number(req.query.amount);
+    const userId = req.query.id;
+    // const user = await User.findById(userId);
+    const user = await User.findOne({ ID: userId });
+    if (!user) {
+      res.status(STATUS_CODE.NOT_FOUND);
+      throw new Error("No such user in the db");
+    }
+    let newCach = user.cash + amount;
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { cash: newCach },
+      }
+    );
+    const updatedUser = await User.findById(user._id);
+    res.send(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
 
-// //@des    withdraw money from a user. (by the user's ID and amount of cash)
-// //@route  Put /api/v1/bank/withdrawMoney/?id=&amount=  query parameters(id & amount)
-// export const withdrawMoney = async (req, res, next) => {
-//     const userId = req.query.id;
-//     const amount = Number(req.query.amount);
-//     try {
-//         if (userId === undefined || amount === undefined) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("query parameters (id, amount) are required")
-//         }
-//         const users = readUsersFromFile();
-//         const index = users.findIndex(u => u.ID === userId)
-//         if (index === -1) {
-//             res.status(STATUS_CODE.NOT_FOUND)
-//             throw new Error("User was not found!")
-//         }
+//@des    withdraw money from a user. (by the user's ID and amount of cash)
+//@route  Put /api/v1/bank/withdrawMoney/?id=&amount=  query parameters(id & amount)
+export const withdrawMoney = async (req, res, next) => {
+  try {
+    if (req.query.amount === undefined || req.query.id === undefined) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("query parameters (id, amount) are required");
+    }
+    const userId = req.query.id;
+    const amount = Number(req.query.amount);
+    // const user = await User.findById(userId);
+    const user = await User.findOne({ ID: userId });
+    if (!user) {
+      res.status(STATUS_CODE.NOT_FOUND);
+      throw new Error("No such user in the db");
+    }
 
-//         let possibleWithdraw = users[index].cash + users[index].credit
-//         if (possibleWithdraw - amount < 0) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("The total amount of withdraw can't exceed the sum of cash and credit")
-//         }
+    let possibleWithdraw = user.cash + user.credit;
+    if (possibleWithdraw - amount < 0) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error(
+        "The total amount of withdraw can't exceed the sum of cash and credit"
+      );
+    }
 
-//         let sum = users[index].cash - amount;
-//         let newCach = (sum >= 0) ? sum : 0;
-//         let newCredit = (sum >= 0) ? users[index].credit : users[index].credit + sum;
-//         const updatedUser = { ...users[index], cash: newCach, credit: newCredit }
-//         users[index] = updatedUser;
-//         writeUsersToFile(users)
-//         res.send(updatedUser)
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+    let sum = user.cash - amount;
+    let newCach = sum >= 0 ? sum : 0;
+    let newCredit = sum >= 0 ? user.credit : user.credit + sum;
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          cash: newCach,
+          credit: newCredit,
+        },
+      }
+    );
+    const updatedUser = await User.findById(user._id);
+    res.send(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
 
-// // transferMoney
-// //@des    withdraw money from a user. (by the user's ID and amount of cash)
-// //@route  Put /api/v1/bank/transferMoney?idFrom=&idTo=&amount=  query parameters(idFrom & idTo & amount)
-// export const transferMoney = async (req, res, next) => {
-//     const idFrom = req.query.idFrom;
-//     const idTo = req.query.idTo;
-//     const amount = Number(req.query.amount);
-//     try {
-//         if (idFrom === undefined || idTo === undefined || amount === undefined) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("query parameters (idFrom, idTo, amount) are required")
-//         }
-//         const users = readUsersFromFile();
-//         const indexFrom = users.findIndex(u => u.ID === idFrom)
-//         if (indexFrom === -1) {
-//             res.status(STATUS_CODE.NOT_FOUND)
-//             throw new Error(`User idFrom=${idFrom} was not found!`)
-//         }
+// transferMoney
+//@des    Transfer money from one user to another . (by the user's ID and amount of cash)
+//@route  Put /api/v1/bank/transferMoney?idFrom=&idTo=&amount=  query parameters(idFrom & idTo & amount)
+export const transferMoney = async (req, res, next) => {
+  try {
+    if (
+      req.query.idFrom === undefined ||
+      req.query.idTo === undefined ||
+      req.query.amount === undefined
+    ) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("query parameters (idFrom, idTo, amount) are required");
+    }
+    const idFrom = req.query.idFrom;
+    const idTo = req.query.idTo;
+    const amount = Number(req.query.amount);
 
-//         const indexTo = users.findIndex(u => u.ID === idTo)
-//         if (indexTo === -1) {
-//             res.status(STATUS_CODE.NOT_FOUND)
-//             throw new Error(`User idTo=${idTo} was not found!`)
-//         }
+    // const userFrom = await User.findById(idFrom);
+    const userFrom = await User.findOne({ ID: idFrom });
+    if (!userFrom) {
+      res.status(STATUS_CODE.NOT_FOUND);
+      throw new Error(`User idFrom=${idFrom} was not found!`);
+    }
 
-//         let possibleWithdraw = users[indexFrom].cash + users[indexFrom].credit
-//         if (possibleWithdraw - amount < 0) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("The total amount of transfer money can't exceed the sum of cash and credit")
-//         }
+    const userTo = await User.findOne({ ID: idTo });
+    if (!userTo) {
+      res.status(STATUS_CODE.NOT_FOUND);
+      throw new Error(`User with idTo=${idTo} was not found!`);
+    }
 
-//         let sum = users[indexFrom].cash - amount;
-//         let newCach = (sum >= 0) ? sum : 0;
-//         let newCredit = (sum >= 0) ? users[indexFrom].credit : users[indexFrom].credit + sum;
-//         const updatedUserFrom = { ...users[indexFrom], cash: newCach, credit: newCredit }
-//         users[indexFrom] = updatedUserFrom;
+    let possibleWithdraw = userFrom.cash + userFrom.credit;
+    if (possibleWithdraw - amount < 0) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error(
+        "The total amount of transfer money can't exceed the sum of cash and credit"
+      );
+    }
 
-//         let newCreditTo = users[indexTo].credit + amount;
-//         const updatedUserTo = { ...users[indexTo], credit: newCreditTo }
-//         users[indexTo] = updatedUserTo;
+    let sum = userFrom.cash - amount;
+    let newCach = sum >= 0 ? sum : 0;
+    let newCredit = sum >= 0 ? userFrom.credit : userFrom.credit + sum;
 
-//         writeUsersToFile(users)
-//         res.send([updatedUserFrom, updatedUserTo])
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+    await User.updateOne(
+      { _id: userFrom._id },
+      {
+        $set: {
+          cash: newCach,
+          credit: newCredit,
+        },
+      }
+    );
 
-// //@des    update a user's credit (only positive numbers)
-// //@route  Put /api/v1/bank/updateCredit/?id=&newCredit=  query parameter(id & newCredit)
-// export const updateUserCredit = async (req, res, next) => {
-//     const userId = req.query.id;
-//     const newCredit = Number(req.query.newCredit);
-//     try {
-//         const users = readUsersFromFile();
-//         const index = users.findIndex(u => u.ID === userId)
-//         if (index === -1) {
-//             res.status(STATUS_CODE.NOT_FOUND)
-//             throw new Error("User was not found!")
-//         }
-//         if (newCredit === undefined) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("add new credit value as a query newCredit!")
-//         }
-//         if (newCredit <= 0) {
-//             res.status(STATUS_CODE.BAD_REQUEST)
-//             throw new Error("credit value can only be a positive number")
-//         }
-//         const updatedUser = { ...users[index], credit: newCredit }
-//         users[index] = updatedUser;
-//         writeUsersToFile(users)
-//         res.send(updatedUser)
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+    let newCreditTo = userTo.credit + amount;
 
+    await User.updateOne(
+      { _id: userTo._id },
+      {
+        $set: { credit: newCreditTo },
+      }
+    );
+
+    const updatedUserFrom = await User.findById(userFrom._id);
+    const updatedUserTo = await User.findById(userTo._id);
+    res.send([updatedUserFrom, updatedUserTo]);
+  } catch (error) {
+    next(error);
+  }
+};
+
+//@des    update a user's credit (only positive numbers)
+//@route  Put /api/v1/bank/updateCredit/?id=&newCredit=  query parameter(id & newCredit)
+export const updateUserCredit = async (req, res, next) => {
+  try {
+    if (req.query.id === undefined || req.query.newCredit === undefined) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("query parameters (id, newCredit) are required");
+    }
+    const userId = req.query.id;
+    const newCredit = Number(req.query.newCredit);
+
+    if (newCredit <= 0) {
+      res.status(STATUS_CODE.BAD_REQUEST);
+      throw new Error("credit value can only be a positive number");
+    }
+
+    // const user = await User.findById(userId);
+    const user = await User.findOne({ ID: userId });
+    if (!user) {
+      res.status(STATUS_CODE.NOT_FOUND);
+      throw new Error("No such user in the db");
+    }
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { credit: newCredit },
+      }
+    );
+    const updatedUser = await User.findById(user._id);
+    res.send(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
