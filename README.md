@@ -10,36 +10,34 @@ You can perform the following actions:
 
 - Add a user:
   Users can be added to the bank. Each user has an ID, cash (default 0), and credit (default 0). Use the following:
-- POST https://bank-api-no1b.onrender.com/api/v1/bank
+- POST https://bank-api-v2.onrender.com/api/v1/bank
   In the body: {"ID": "", "cash": #, "credit": #}
 
 - Depositing
   Can deposit cash to a user. (by the user's ID and amount of cash) use:
-- PUT https://bank-api-no1b.onrender.com/api/v1/bank/depositCash/?id=&amount=
+- PUT https://bank-api-v2.onrender.com/api/v1/bank/depositCash/?id=&amount=
 
 - Withdraw money
   Can withdraw money from a user acount:
-- PUT https://bank-api-no1b.onrender.com/api/v1/bank/withdrawMoney/?id=userID&amount=theWithdrawAmount
+- PUT https://bank-api-v2.onrender.com/api/v1/bank/withdrawMoney/?id=userID&amount=theWithdrawAmount
 
 - Update Credit
   allow updates to user's credit limit:
-- PUT https://bank-api-no1b.onrender.com/api/v1/bank/updateCredit/?id=userID&newCredit=newLimit
+- PUT https://bank-api-v2.onrender.com/api/v1/bank/updateCredit/?id=userID&newCredit=newLimit
 
 - Transfer Funds
   Enable money transfer between users
-- PUT https://bank-api-no1b.onrender.com/api/v1/bank/transferMoney/?idFrom=userTranferFrom&idTo=idTransferTo&amount=1000
+- PUT https://bank-api-v2.onrender.com/api/v1/bank/transferMoney/?idFrom=userTranferFrom&idTo=idTransferTo&amount=1000
 
 - User Details
   Retrive details of a specific user
-- GET https://bank-api-no1b.onrender.com/api/v1/bank/:ID
+- GET https://bank-api-v2.onrender.com/api/v1/bank/:ID
 
--All users
+- All users
 Fetch details of all users
+GET https://bank-api-v2.onrender.com/api/v1/bank
 
-- GET https://bank-api-no1b.onrender.com/api/v1/bank
-
--Filter Users
+- Filter Users
 Filter users based on cash amount
-
-- GET https://bank-api-no1b.onrender.com/api/v1/bank/filter/moreThan/?cash=100
+- GET https://bank-api-v2.onrender.com/api/v1/bank/filter/moreThan/?cash=100
   returns all the users with cash mor than 100
