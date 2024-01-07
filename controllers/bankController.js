@@ -86,7 +86,7 @@ export const depositCash = async (req, res, next) => {
   try {
     if (req.query.amount === undefined || req.query.id === undefined) {
       res.status(STATUS_CODE.BAD_REQUEST);
-      throw new Error("add (id ,amount)  as a query parameters");
+      throw new Error(`add (id=${id} ,amount=${amount})  as a query parameters`);
     }
     const amount = Number(req.query.amount);
     const userId = req.query.id;
