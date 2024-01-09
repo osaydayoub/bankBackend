@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import bankRoutes from "./routes/bankRoutes.js";
+import authUserRoutes from './routes/authUserRoutes.js'
 import cors from "cors";
 import connectDB from "./config/db.js";
 dotenv.config();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // Bank Routes
 app.use("/api/v1/bank", bankRoutes);
+app.use("/api/v1/users",authUserRoutes)
 
 //Error handling Middleware
 app.use(errorHandler);

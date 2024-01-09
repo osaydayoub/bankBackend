@@ -1,5 +1,6 @@
 import express from "express";
 import { createUser, deleteUser, depositCash, filteredUsers, getAllUsers, getUserById, transferMoney, updateUserCredit, withdrawMoney } from "../controllers/bankController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -11,6 +12,11 @@ router.get("/:id", getUserById);
 
 //Route filter the users ,can fetch users by the amount of cash they have
 router.get('/filter/moreThan', filteredUsers)
+
+
+
+// router.use(protect);
+// Private routes
 
 //Route to creat a new user
 router.post("/", createUser);
