@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/test", (req, res) => {
+  console.log("Hi ...")
   res.send("Hellow World");
 });
 
