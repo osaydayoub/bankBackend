@@ -191,7 +191,6 @@ export const transferMoney = async (req, res, next) => {
         "The total amount of transfer money can't exceed the sum of cash and credit"
       );
     }
-    console.log(`userFrom.cash=${userFrom.cash}`)
 
     let sum = userFrom.cash - amount;
     let newCach = sum >= 0 ? sum : 0;
