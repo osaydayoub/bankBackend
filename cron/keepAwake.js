@@ -6,7 +6,7 @@ import axios from "axios";
 cron.schedule("*/14 * * * *", () => {
   const wakeUp = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/test");
+      const res = await axios.get("https://bank-api-v2.onrender.com/test");
       console.log("Hello!");
     } catch (error) {
       console.log("error in wakeUp");
