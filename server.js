@@ -3,7 +3,6 @@ import express from "express";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import bankRoutes from "./routes/bankRoutes.js";
 import authUserRoutes from "./routes/authUserRoutes.js";
-import "./cron/keepAwake.js";
 import cors from "cors";
 import connectDB from "./config/db.js";
 dotenv.config();
